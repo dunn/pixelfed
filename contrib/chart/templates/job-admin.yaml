@@ -1,0 +1,57 @@
+{{- if .Values.pixelfed.initial_admin.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "pixelfed.fullname" . }}-admin
+  labels:
+    {{- include "pixelfed.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    "helm.sh/hook-weight": "0"
+spec:
+  template:
+    metadata:
+      name: {{ include "pixelfed.fullname" . }}-admin
+      labels:
+        {{- include "pixelfed.selectorLabels" . | nindent 8 }}
+        component: app
+    spec:
+      restartPolicy: Never
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: component
+                  operator: In
+                  values:
+                    - app
+            topologyKey: kubernetes.io/hostname
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ template "pixelfed.fullname" . }}-data
+      containers:
+        - name: {{ include "pixelfed.fullname" . }}-admin
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - php
+            - artisan
+            - user:create
+            - --name="{{ .Values.pixelfed.initial_admin.name }}"
+            - --username="{{ .Values.pixelfed.initial_admin.username }}"
+            - --email="{{ .Values.pixelfed.initial_admin.email }}"
+            - --password="{{ .Values.pixelfed.initial_admin.password }}"
+            - --is_admin="1"
+            - --confirm_email="0"
+          volumeMounts:
+            - name: data
+              mountPath: /var/www/storage
+          envFrom:
+            - configMapRef:
+                name: {{ include "pixelfed.fullname" . }}-env
+            - secretRef:
+                name: {{ template "pixelfed.fullname" . }}
+{{- end }}

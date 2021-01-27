@@ -1,0 +1,14 @@
+{{- if .Values.pixelfed.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ template "pixelfed.fullname" . }}-data
+  labels:
+    {{- include "pixelfed.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - {{ .Values.pixelfed.persistence.data.accessMode }}
+  resources:
+    {{- toYaml .Values.pixelfed.persistence.data.resources | nindent 4}}
+  storageClassName: {{ .Values.pixelfed.persistence.data.storageClassName }}
+{{- end }}

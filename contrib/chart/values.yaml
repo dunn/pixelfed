@@ -1,0 +1,150 @@
+replicaCount: 1
+
+image:
+  repository: pixelfed/pixelfed
+  pullPolicy: Always
+  tag: latest
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+pixelfed:
+  activitypub:
+    enabled: true
+    remote_follow: true
+    shared_inbox: true
+    inbox: true
+    outbox: true
+    atom: true
+    node_info: true
+    webfinger: true
+  initial_admin:
+    enabled: false
+    # name:
+    # username:
+    # email:
+    # password:
+  persistence:
+    enabled: true
+    data:
+      accessMode: ReadWriteOnce
+      resources:
+        requests:
+          storage: 20Gi
+      # if not set explicitly, this should be commented out
+      # storageClassName:
+  smtp:
+    driver: log
+    enabled: false
+    encryption: tls
+    from_address: "pixelfed@cool.tld"
+    from_name: "Pixels"
+    host: smtp.sparkpostmail.com
+    port: 2525
+    username: SMTP_Injection
+    # password:
+  contact_email: ""
+  dark_mode: true
+  hostname: pixelfed.cool.tld
+  image_quality: 80
+  limit_account_size: true
+  locale: en
+  max_account_size: 1000000
+  max_album_length: 4
+  max_avatar_size: 2000
+  max_bio_length: 125
+  max_caption_length: 500
+  max_links_per_post: 0
+  max_name_length: 30
+  max_photo_size: 15000
+  max_users: 1000
+  name: "Pixelfed"
+  open_registration: true
+  optimize_images: true
+  optimize_videos: true
+  public_hashtags: false
+  public_local_timeline: false
+  restricted_instance: false
+  stories_enabled: false
+
+ingress:
+  enabled: true
+  # may be different depending on your ingress controller configuration
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  hosts:
+    - host: pixelfed.cool.tld
+      paths:
+        - path: '/'
+  tls:
+   - secretName: hewwo-tls
+     hosts:
+       - pixelfed.cool.tld
+
+mysql:
+  image:
+    repository: bitnami/mysql
+    tag: 8.0.23
+  auth:
+    database: pixelfed
+    # password:
+    username: pixeluser
+
+redis:
+  image:
+    repository: bitnami/redis
+    tag: 6.0.9
+  # password:
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

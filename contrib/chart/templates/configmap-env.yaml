@@ -1,0 +1,87 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "pixelfed.fullname" . }}-env
+  labels:
+    {{- include "pixelfed.labels" . | nindent 4 }}
+data:
+  ACCOUNT_DELETE_AFTER: "false"
+  ACCOUNT_DELETION: "true"
+  ADMIN_DOMAIN: {{ .Values.pixelfed.hostname }}
+  ADMIN_ENV_EDITOR: "false"
+  APP_DEBUG: "false"
+  APP_DOMAIN: {{ .Values.pixelfed.hostname }}
+  APP_ENV: production
+  APP_LOCALE: {{ .Values.pixelfed.locale }}
+  APP_NAME: {{ .Values.pixelfed.name }}
+  APP_TIMEZONE: UTC
+  APP_URL: https://{{ .Values.pixelfed.hostname }}
+  BANNED_USERNAMES: ""
+  BROADCAST_DRIVER: log
+  CACHE_DRIVER: redis
+  DB_CONNECTION: mysql
+  DB_DATABASE: {{ .Values.mysql.auth.database }}
+  DB_HOST: {{ template "pixelfed.mysql.fullname" . }}
+  DB_PORT: "3306"
+  DB_USERNAME: {{ .Values.mysql.auth.username }}
+  ENFORCE_EMAIL_VERIFICATION: {{ .Values.pixelfed.smtp.enabled |  quote }}
+  FILESYSTEM_CLOUD: s3
+  FILESYSTEM_DRIVER: local
+  HORIZON_DARKMODE: {{ .Values.pixelfed.dark_mode | quote }}
+  IMAGE_DRIVER: imagick
+  IMAGE_QUALITY: {{ .Values.pixelfed.image_quality | quote }}
+  INSTANCE_CONTACT_EMAIL: {{ .Values.pixelfed.contact_email }}
+  INSTANCE_PUBLIC_HASHTAGS: {{ .Values.pixelfed.public_hashtags | quote }}
+  INSTANCE_PUBLIC_LOCAL_TIMELINE: {{ .Values.pixelfed.public_local_timeline | quote }}
+  LIMIT_ACCOUNT_SIZE: {{ .Values.pixelfed.limit_account_size | quote }}
+  LOG_CHANNEL: stderr
+  MAX_ACCOUNT_SIZE: {{ .Values.pixelfed.max_account_size | quote }}
+  MAX_ALBUM_LENGTH: {{ .Values.pixelfed.max_album_length | quote }}
+  MAX_AVATAR_SIZE: {{ .Values.pixelfed.max_avatar_size | quote }}
+  MAX_BIO_LENGTH: {{ .Values.pixelfed.max_bio_length | quote }}
+  MAX_CAPTION_LENGTH: {{ .Values.pixelfed.max_caption_length | quote }}
+  MAX_LINKS_PER_POST: {{ .Values.pixelfed.max_links_per_post | quote }}
+  MAX_NAME_LENGTH: {{ .Values.pixelfed.max_name_length | quote }}
+  MAX_PHOTO_SIZE: {{ .Values.pixelfed.max_photo_size | quote }}
+  MEDIA_EXIF_DATABASE: "false"
+  MYSQL_DATABASE: {{ .Values.mysql.auth.database }}
+  MYSQL_RANDOM_ROOT_PASSWORD: "false"
+  MYSQL_USER: {{ .Values.mysql.auth.username }}
+  OAUTH_ENABLED: "true"
+  OPEN_REGISTRATION: {{ .Values.pixelfed.open_registration | quote }}
+  PF_COSTAR_ENABLED: "false"
+  PF_ENABLE_CLOUD: "false"
+  PF_MAX_USERS: {{ .Values.pixelfed.max_users | quote }}
+  PF_OPTIMIZE_IMAGES: {{ .Values.pixelfed.optimize_images | quote }}
+  PF_OPTIMIZE_VIDEOS: {{ .Values.pixelfed.optimize_videos | quote }}
+  QUEUE_DRIVER: redis
+  REDIS_CLIENT: phpredis
+  REDIS_DATABASE: "0"
+  REDIS_HOST: {{ template "pixelfed.redis.fullname" . }}-master
+  REDIS_PORT: "6379"
+  REDIS_SCHEME: tcp
+  RESTRICTED_INSTANCE: {{ .Values.pixelfed.restricted_instance | quote }}
+  RESTRICT_HTML_TYPES: "true"
+  SESSION_DOMAIN: {{ .Values.pixelfed.hostname }}
+  SESSION_DRIVER: redis
+  STORIES_ENABLED: {{ .Values.pixelfed.stories_enabled | quote }}
+  TRUST_PROXIES: "*"
+{{- if .Values.pixelfed.activitypub.enabled }}
+  ACTIVITY_PUB: "true"
+  AP_INBOX: {{ .Values.pixelfed.activitypub.inbox | quote }}
+  AP_OUTBOX: {{ .Values.pixelfed.activitypub.outbox | quote }}
+  AP_REMOTE_FOLLOW: {{ .Values.pixelfed.activitypub.remote_follow | quote }}
+  AP_SHAREDINBOX: {{ .Values.pixelfed.activitypub.shared_inbox | quote }}
+  ATOM_FEEDS: {{ .Values.pixelfed.activitypub.atom | quote }}
+  NODEINFO: {{ .Values.pixelfed.activitypub.node_info | quote }}
+  WEBFINGER: {{ .Values.pixelfed.activitypub.webfinger | quote }}
+{{- end }}
+{{- if .Values.pixelfed.smtp.enabled }}
+  MAIL_DRIVER: smtp
+  MAIL_HOST: {{ .Values.pixelfed.smtp.host }}
+  MAIL_PORT: {{ .Values.pixelfed.smtp.port | quote }}
+  MAIL_FROM_ADDRESS: {{ .Values.pixelfed.smtp.from_address }}
+  MAIL_FROM_NAME: {{ .Values.pixelfed.smtp.from_name }}
+  MAIL_USERNAME: {{ .Values.pixelfed.smtp.username }}
+  MAIL_ENCRYPTION: {{ .Values.pixelfed.smtp.encryption }}
+{{- end }}

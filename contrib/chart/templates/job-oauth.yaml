@@ -1,0 +1,49 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "pixelfed.fullname" . }}-oauth
+  labels:
+    {{- include "pixelfed.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    "helm.sh/hook-weight": "0"
+spec:
+  template:
+    metadata:
+      name: {{ include "pixelfed.fullname" . }}-oauth
+      labels:
+        {{- include "pixelfed.selectorLabels" . | nindent 8 }}
+        component: app
+    spec:
+      restartPolicy: Never
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: component
+                  operator: In
+                  values:
+                    - app
+            topologyKey: kubernetes.io/hostname
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ template "pixelfed.fullname" . }}-data
+      containers:
+        - name: {{ include "pixelfed.fullname" . }}-oauth
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - contrib/docker/oauth.sh
+          volumeMounts:
+            - name: data
+              mountPath: /var/www/storage
+          envFrom:
+            - configMapRef:
+                name: {{ include "pixelfed.fullname" . }}-env
+            - secretRef:
+                name: {{ template "pixelfed.fullname" . }}
